@@ -5,8 +5,12 @@
 
     <div class="song-config">
       <label>
-        Song ID
-        <input v-model="songId" placeholder="e.g. tutorial" />
+        Song
+        <select v-model="songId">
+          <option v-for="song in songs" :key="song.id" :value="song.id">
+            {{ song.name }}
+          </option>
+        </select>
       </label>
 
       <label>
@@ -35,6 +39,35 @@
 
 <script setup>
 import { ref } from 'vue'
+
+const songs = [
+  { id: 'tutorial', name: 'Tutorial' },
+  { id: 'bopeebo', name: 'Bopeebo' },
+  { id: 'fresh', name: 'Fresh' },
+  { id: 'dadbattle', name: 'Dad Battle' },
+  { id: 'spookeez', name: 'Spookeez' },
+  { id: 'south', name: 'South' },
+  { id: 'monster', name: 'Monster' },
+  { id: 'pico', name: 'Pico' },
+  { id: 'philly-nice', name: 'Philly Nice' },
+  { id: 'blammed', name: 'Blammed' },
+  { id: 'satin-panties', name: 'Satin Panties' },
+  { id: 'high', name: 'High' },
+  { id: 'milf', name: 'M.I.L.F' },
+  { id: 'cocoa', name: 'Cocoa' },
+  { id: 'eggnog', name: 'Eggnog' },
+  { id: 'winter-horrorland', name: 'Winter Horrorland' },
+  { id: 'senpai', name: 'Senpai' },
+  { id: 'roses', name: 'Roses' },
+  { id: 'thorns', name: 'Thorns' },
+  { id: 'ugh', name: 'Ugh' },
+  { id: 'guns', name: 'Guns' },
+  { id: 'stress', name: 'Stress' },
+  { id: 'darnell', name: 'Darnell' },
+  { id: 'lit-up', name: 'Lit Up' },
+  { id: '2hot', name: '2Hot' },
+  { id: 'blazin', name: 'Blazin' },
+]
 
 const songId = ref('tutorial')
 const difficulty = ref('normal')
