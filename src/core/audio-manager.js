@@ -1,5 +1,7 @@
 // Web Audio API manager for precise music playback
 
+const BASE = import.meta.env.BASE_URL
+
 export class AudioManager {
   constructor() {
     this.ctx = null
@@ -32,7 +34,7 @@ export class AudioManager {
     await this.init()
 
     // Load instrumental (generate silent buffer if missing)
-    const instUrl = `/songs/${songId}/Inst.ogg`
+    const instUrl = `${BASE}songs/${songId}/Inst.ogg`
     try {
       this.instrumentalBuffer = await this._loadAudio(instUrl)
     } catch (e) {
@@ -44,7 +46,7 @@ export class AudioManager {
     this.vocalBuffers = []
     for (const file of vocalFiles) {
       try {
-        const url = `/songs/${songId}/${file}`
+        const url = `${BASE}songs/${songId}/${file}`
         const buffer = await this._loadAudio(url)
         this.vocalBuffers.push(buffer)
       } catch (e) {

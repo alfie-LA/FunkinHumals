@@ -2,13 +2,15 @@
 // Format reference: Funkin-main/source/funkin/data/song/SongData.hx, docs/FNFC-SPEC.md
 import { KEY_COUNT } from '../constants.js'
 
+const BASE = import.meta.env.BASE_URL
+
 /**
  * Load song metadata from FNF format.
  * @param {string} songId
  * @returns {Promise<{songName, artist, timeChanges, difficulties, characters, stage, noteStyle, ratings}>}
  */
 export async function loadMetadata(songId) {
-  const url = `/songs/${songId}/${songId}-metadata.json`
+  const url = `${BASE}songs/${songId}/${songId}-metadata.json`
   const res = await fetch(url)
   if (!res.ok) throw new Error(`Failed to load metadata: ${url} (${res.status})`)
   const data = await res.json()
@@ -39,7 +41,7 @@ export async function loadMetadata(songId) {
  * @returns {Promise<{notes: Array, events: Array, scrollSpeed: number}>}
  */
 export async function loadChart(songId, difficulty = 'normal') {
-  const url = `/songs/${songId}/${songId}-chart.json`
+  const url = `${BASE}songs/${songId}/${songId}-chart.json`
   const res = await fetch(url)
   if (!res.ok) throw new Error(`Failed to load chart: ${url} (${res.status})`)
   const data = await res.json()
