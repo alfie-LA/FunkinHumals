@@ -6,6 +6,9 @@ import { InputManager } from '../core/input-manager.js'
 import { scoreNote, judgeNote, getMissScore } from '../core/scoring.js'
 import { loadMetadata, loadChart, splitNotes } from '../core/chart-loader.js'
 import { transformNotes } from '../core/note-transformer.js'
+import { Stage } from './stage.js'
+import { Camera } from './camera.js'
+import { EventHandler } from './event-handler.js'
 import {
   HIT_WINDOW_MS, KEY_COUNT, HEALTH_MAX, HEALTH_MIN, HEALTH_START,
   HEALTH_SICK_BONUS, HEALTH_GOOD_BONUS, HEALTH_BAD_BONUS, HEALTH_SHIT_BONUS,
@@ -14,6 +17,7 @@ import {
   JUDGEMENT_SICK_COMBO_BREAK, JUDGEMENT_GOOD_COMBO_BREAK,
   JUDGEMENT_BAD_COMBO_BREAK, JUDGEMENT_SHIT_COMBO_BREAK,
   CONDUCTOR_DRIFT_THRESHOLD, MUSIC_EASE_RATIO,
+  CAMERA_ZOOM_RATE,
 } from '../constants.js'
 
 const HEALTH_MAP = {
@@ -63,6 +67,11 @@ export class GameEngine {
 
     // Game state (reactive — Vue will watch this)
     this.state = this._freshState()
+
+    // Stage, camera, events
+    this.stage = new Stage()
+    this.camera = new Camera()
+    this.eventHandler = null
 
     // Callbacks for renderer
     this.onNoteHit = null        // (direction, judgement) => void
@@ -135,6 +144,38 @@ export class GameEngine {
 
     // Count total scoreable player notes
     this.state.tallies.totalNotes = this.playerNotes.length
+
+    // Load stage and characters
+    try {
+      const stageId = this.metadata.stage ?? 'mainStage'
+      await this.stage.load(stageId)
+      this.camera.setZoom(this.stage.cameraZoom)
+      this.camera.characters = this.stage.characters
+      // Start camera focused on opponent
+      if (this.stage.characters.dad) {
+        this.camera.focusOnCharacter(1)
+        this.camera.followPoint.x = this.camera.targetPoint.x
+        this.camera.followPoint.y = this.camera.targetPoint.y
+      }
+    } catch (e) {
+      console.warn('Could not load stage (running without visuals):', e)
+    }
+
+    // Set up chart event handler
+    this.eventHandler = new EventHandler(chart.events)
+
+    // Wire conductor beat callbacks for camera bop and character dance
+    this.conductor.onBeatHit = () => {
+      const beat = this.conductor.currentBeat
+      // Camera bop every CAMERA_ZOOM_RATE beats
+      if (beat % CAMERA_ZOOM_RATE === 0) {
+        this.camera.bop()
+      }
+      // Character dance on beat
+      this.stage.characters.gf?.danceBeat(beat)
+      this.stage.characters.dad?.danceBeat(beat)
+      this.stage.characters.bf?.danceBeat(beat)
+    }
   }
 
   _getVocalFiles() {
@@ -171,6 +212,16 @@ export class GameEngine {
       this._updateCountdown(elapsed)
     } else if (this.state.playing) {
       this._updatePlaying(elapsed)
+    }
+
+    // Update camera and characters every frame
+    this.camera.update(elapsed)
+    const isHolding = this.input.isHeld(0) || this.input.isHeld(1) || this.input.isHeld(2) || this.input.isHeld(3)
+    this.stage.updateCharacters(elapsed, this.conductor, isHolding)
+
+    // Process chart events
+    if (this.eventHandler && this.conductor.songPosition > 0) {
+      this.eventHandler.update(this.conductor.songPosition, this.camera, this.stage.characters)
     }
 
     // Update state for Vue

@@ -1,6 +1,8 @@
 // Canvas renderer for strumlines, notes, hold trails, hit effects.
+// Two-layer pipeline: scene (camera-affected) then HUD (fixed strumlines).
 import {
   KEY_COUNT, DIRECTION_COLORS, DIRECTION_NAMES, PIXELS_PER_MS, HIT_WINDOW_MS,
+  GAME_WIDTH, GAME_HEIGHT,
 } from '../constants.js'
 
 const RECEPTOR_Y = 80           // Y position of receptor row
@@ -60,26 +62,66 @@ export class Renderer {
    * @param {number} params.scrollSpeed
    * @param {Array} params.playerNotes - Player note states
    * @param {Array} params.opponentNotes - Opponent note states
+   * @param {import('./stage.js').Stage} [params.stage] - Stage with props and characters
+   * @param {import('./camera.js').Camera} [params.camera] - Camera system
    */
-  draw({ songPosition, scrollSpeed, playerNotes, opponentNotes }) {
+  draw({ songPosition, scrollSpeed, playerNotes, opponentNotes, stage, camera }) {
     const ctx = this.ctx
     ctx.clearRect(0, 0, this.width, this.height)
 
-    // Background
-    ctx.fillStyle = '#1a1a2e'
-    ctx.fillRect(0, 0, this.width, this.height)
+    // === LAYER 1: Game scene (camera-affected) ===
+    if (stage && camera) {
+      this._drawScene(ctx, stage, camera)
+    } else {
+      // Fallback background when no stage loaded
+      ctx.fillStyle = '#1a1a2e'
+      ctx.fillRect(0, 0, this.width, this.height)
+    }
 
-    // Calculate strumline positions (centered)
-    const totalWidth = STRUMLINE_WIDTH * 2 + 80  // 80px gap between strumlines
+    // Semi-transparent overlay between scene and strumlines for readability
+    if (stage) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'
+      ctx.fillRect(0, 0, this.width, this.height)
+    }
+
+    // === LAYER 2: HUD strumlines (NOT camera-affected) ===
+    const totalWidth = STRUMLINE_WIDTH * 2 + 80
     const startX = (this.width - totalWidth) / 2
     const opponentX = startX
     const playerX = startX + STRUMLINE_WIDTH + 80
 
-    // Draw opponent strumline
     this._drawStrumline(ctx, opponentX, songPosition, scrollSpeed, opponentNotes, true)
-
-    // Draw player strumline
     this._drawStrumline(ctx, playerX, songPosition, scrollSpeed, playerNotes, false)
+  }
+
+  /**
+   * Draw the game scene: stage props and characters under camera transform.
+   */
+  _drawScene(ctx, stage, camera) {
+    ctx.save()
+
+    // Scale canvas to map FNF's 1280x720 virtual space to actual canvas size
+    const scaleX = this.width / GAME_WIDTH
+    const scaleY = this.height / GAME_HEIGHT
+    const scale = Math.min(scaleX, scaleY) * 0.55 // Fit with room for HUD
+
+    // Camera transform: zoom from center, follow point
+    const zoom = camera.effectiveZoom
+    const cx = this.width / 2
+    const cy = this.height / 2
+
+    ctx.translate(cx, cy)
+    ctx.scale(scale * zoom, scale * zoom)
+
+    // Draw stage props with parallax
+    const camX = camera.followPoint.x
+    const camY = camera.followPoint.y
+    stage.drawProps(ctx, camX, camY)
+
+    // Draw characters
+    stage.drawCharacters(ctx, camX, camY)
+
+    ctx.restore()
   }
 
   _drawStrumline(ctx, baseX, songPosition, scrollSpeed, notes, isOpponent) {

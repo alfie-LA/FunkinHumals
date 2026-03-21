@@ -17,13 +17,15 @@ let animId = null
 function renderLoop() {
   if (!renderer || !props.engine) return
 
-  const { conductor, playerNoteStates, opponentNoteStates, scrollSpeed } = props.engine
+  const { conductor, playerNoteStates, opponentNoteStates, scrollSpeed, stage, camera } = props.engine
 
   renderer.draw({
     songPosition: conductor.songPosition,
     scrollSpeed,
     playerNotes: playerNoteStates,
     opponentNotes: opponentNoteStates,
+    stage,
+    camera,
   })
 
   animId = requestAnimationFrame(renderLoop)
@@ -40,15 +42,18 @@ onMounted(() => {
   handleResize()
   window.addEventListener('resize', handleResize)
 
-  // Wire up engine visual callbacks
+  // Wire up engine visual callbacks + character animations
   props.engine.onNoteHit = (dir, judgement) => {
     renderer.glowReceptor(dir)
+    props.engine.stage.characters.bf?.playSing(dir)
   }
   props.engine.onNoteMiss = (dir) => {
     renderer.flashMiss(dir)
+    props.engine.stage.characters.bf?.playMiss(dir)
   }
   props.engine.onOpponentHit = (dir) => {
     renderer.glowOpponentReceptor(dir)
+    props.engine.stage.characters.dad?.playSing(dir)
   }
 
   animId = requestAnimationFrame(renderLoop)

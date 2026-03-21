@@ -71,6 +71,17 @@ export const KEY_BINDINGS = {
   KeyK: 3,
 }
 
+// Camera (from PlayState.hx / Constants.hx)
+export const CAMERA_BOP_INTENSITY = 1.015
+export const CAMERA_ZOOM_RATE = 4       // Bop every N beats
+export const CAMERA_DECAY_RATE = 0.95   // Per-frame lerp decay (normalized to 60fps)
+export const CAMERA_FOLLOW_RATE = 0.04  // Camera follow lerp rate
+export const DEFAULT_STAGE_ZOOM = 1.1   // mainStage default
+
+// Virtual resolution (FNF internal coordinate space)
+export const GAME_WIDTH = 1280
+export const GAME_HEIGHT = 720
+
 // Direction names
 export const DIRECTION_NAMES = ['left', 'down', 'up', 'right']
 
