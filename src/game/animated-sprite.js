@@ -108,12 +108,8 @@ export class AnimatedSprite {
 
     ctx.save()
     ctx.translate(x, y)
+    if (flipX) ctx.scale(-1, 1)
     ctx.scale(scale, scale)
-    if (flipX) {
-      // Offset by frame width so the sprite stays at the same visual position when flipped
-      ctx.translate(frame.frameWidth, 0)
-      ctx.scale(-1, 1)
-    }
 
     // Apply animation offsets
     const ox = this.currentOffsets[0] || 0
