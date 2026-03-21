@@ -103,7 +103,7 @@ export class Renderer {
     // Scale canvas to map FNF's 1280x720 virtual space to actual canvas size
     const scaleX = this.width / GAME_WIDTH
     const scaleY = this.height / GAME_HEIGHT
-    const scale = Math.min(scaleX, scaleY) * 0.55 // Fit with room for HUD
+    const scale = Math.min(scaleX, scaleY) * 0.65 // Fit scene behind HUD
 
     // Camera transform: zoom from center, follow point
     const zoom = camera.effectiveZoom
