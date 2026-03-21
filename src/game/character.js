@@ -86,14 +86,16 @@ export class Character {
    * @param {number[]} cameraOffsets - [x, y] from stage data
    */
   setPosition(x, y, cameraOffsets = [0, 0]) {
-    this.x = x
-    this.y = y
-    // Camera focus = character center + stage camera offsets
-    // Character center approximated from sprite frame size
+    // Stage data stores the character's "feet" position:
+    // horizontal center + vertical bottom, matching original FNF stage logic.
     const w = this.sprite?.frameWidth ?? 200
     const h = this.sprite?.frameHeight ?? 400
-    this.cameraFocusPoint.x = x + (w * this.scale) / 2 + cameraOffsets[0]
-    this.cameraFocusPoint.y = y + (h * this.scale) / 2 + cameraOffsets[1]
+    this.x = x - (w * this.scale) / 2
+    this.y = y - (h * this.scale)
+
+    // Camera focus = approximate character center + stage camera offsets.
+    this.cameraFocusPoint.x = this.x + (w * this.scale) / 2 + cameraOffsets[0]
+    this.cameraFocusPoint.y = this.y + (h * this.scale) / 2 + cameraOffsets[1]
   }
 
   /** Play sing animation for a direction (0=left, 1=down, 2=up, 3=right). */
