@@ -100,17 +100,11 @@ export class Renderer {
   _drawScene(ctx, stage, camera) {
     ctx.save()
 
-    // Responsive scale: adapt to canvas aspect ratio so characters
-    // spread proportionally regardless of window size.
-    // Blend between width-based and height-based scaling depending on aspect ratio.
-    const canvasAspect = this.width / this.height
-    const gameAspect = GAME_WIDTH / GAME_HEIGHT  // 1.78 (16:9)
+    // Fixed scale matching original FNF framing.
+    // Use the smaller axis to ensure the scene fits, then apply a zoom multiplier.
     const scaleX = this.width / GAME_WIDTH
     const scaleY = this.height / GAME_HEIGHT
-    // Wide windows: use height to scale (characters fill vertically, spread horizontally)
-    // Tall windows: use width to scale (fit width, characters stack closer vertically)
-    const baseScale = canvasAspect > gameAspect ? scaleY : scaleX
-    const scale = baseScale * 0.75
+    const scale = Math.min(scaleX, scaleY) * 0.7
 
     // Camera transform: zoom from center, follow point
     const zoom = camera.effectiveZoom
