@@ -28,9 +28,9 @@ export async function loadText(path) {
   return text
 }
 
-/** Load JSON file. */
+/** Load JSON file. Cache-busted to avoid stale data on deploys. */
 export async function loadJSON(path) {
-  const res = await fetch(`${BASE}${path}`)
+  const res = await fetch(`${BASE}${path}?v=${Date.now()}`)
   if (!res.ok) throw new Error(`Failed to load: ${path} (${res.status})`)
   return res.json()
 }
