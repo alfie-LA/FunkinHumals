@@ -42,7 +42,7 @@
   "characters": {
     "bf": {
       "zIndex": 300,
-      "position": [1150, 885],
+      "position": [1350, 885],
       "cameraOffsets": [-100, -100]
     },
     "dad": {
@@ -53,7 +53,7 @@
     "gf": {
       "zIndex": 100,
       "cameraOffsets": [0, 0],
-      "position": [670, 787]
+      "position": [350, 767]
     }
   },
   "name": "Main Stage",
